@@ -24,6 +24,10 @@ class PerguntaApp extends StatelessWidget {
             fontFamily: 'Inter',
             fontWeight: FontWeight.normal,
             fontSize: 18
+          ),
+          button: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold
           )
         ),
         appBarTheme: AppBarTheme(
@@ -46,19 +50,14 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
-  List<Transaction> transactions = [
-    Transaction(id: 't1', title: 'Geladeira', value: 1200.00, data: DateTime.parse('2022-05-21 12:12')),
-    Transaction(id: 't2', title: 'PC', value: 900.00, data: DateTime.now().subtract(Duration(days: 3))),
-    Transaction(id: 't3', title: 'Airfryer', value: 300.00, data: DateTime.now().subtract(Duration(days: 4))),
-  ];
+  final List<Transaction> transactions = [];
 
-
-  _addTransaction (String title, double value) {
+  _addTransaction (String title, double value, DateTime date) {
     final newTransaction = Transaction(
       id: Random().nextDouble().toString(),
       title: title,
       value: value,
-      data: DateTime.now()
+      data: date
       );
     setState(() {
       transactions.add(newTransaction);
@@ -85,27 +84,49 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  _removeTransaction(String id) {
+    setState(() {
+        transactions.removeWhere((tr) => tr.id == id);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text('Despesas Pessoais'),
+
+    final appBar = AppBar(
+          title: Text('Despesas Pessoais',
+          style: TextStyle(
+            fontSize: 15 * MediaQuery.of(context).textScaleFactor
+          )
+          ),
           actions: <Widget>[
             IconButton(
               icon: Icon(Icons.add),
               onPressed: () => openTransactionModal(context)
             )
           ],
-        ),
+        );
+    final avaliableHeight = MediaQuery.of(context).size.height 
+    - appBar.preferredSize.height;
+
+
+    return Scaffold(
+        appBar: appBar,
         body: SingleChildScrollView(
           child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Column(
               children: <Widget>[
-                Chart(_recentTransactions),
-                TransactionList(transactions),
+                Container(
+                  height: MediaQuery.of(context).size.height * 0.35,
+                  child: TransactionChart(_recentTransactions),
+                ),
+                Container(
+                  height: avaliableHeight * 0.65,
+                  child: TransactionList(transactions, _removeTransaction),
+                )
+                
               ],
             )
           ],
